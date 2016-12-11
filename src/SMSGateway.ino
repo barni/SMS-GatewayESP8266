@@ -1,4 +1,5 @@
 /**
+Install aRest API https://github.com/marcoschwartz/aREST.git  platformio lib install 429
 REST API for SMS, e.g. http://sms.local/sms?params=111111^Dies ist ein Test2
  http://192.168.1.63/sms?params=1111^Dies ist ein Test2
 */
@@ -25,7 +26,7 @@ aREST rest = aREST();
 // WiFi parameters
 const char* ssid = "-------";
 const char* password = "---------";
-const String messageNumber = "0123456790"
+const String messageNumber = "0123456790";
 
 // The port to listen for incoming TCP connections
 #define LISTEN_PORT           80
