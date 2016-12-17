@@ -1,5 +1,6 @@
 /**
 Install aRest API https://github.com/marcoschwartz/aREST.git  platformio lib install 429
+Install Wifimanager platformio lib install 567 https://github.com/tzapu/WiFiManager
 REST API for SMS, e.g. http://sms.local/sms?params=111111^Dies ist ein Test2
  http://192.168.1.63/sms?params=1111^Dies ist ein Test2
 */
@@ -11,6 +12,7 @@ REST API for SMS, e.g. http://sms.local/sms?params=111111^Dies ist ein Test2
 #include <aREST.h>
 #include <Tools.h>
 #include <A6libcust.h>
+#include <WiFiManager.h>
 
 A6libcust A6l(D6, D5); // tx GPIO12, GPIO14
 int unreadSMSLocs[30] = {0};
@@ -23,10 +25,8 @@ SMSmessage sms;
 // Create aREST instance
 aREST rest = aREST();
 
-// WiFi parameters
-const char* ssid = "-------";
-const char* password = "---------";
-const String messageNumber = "0123456790";
+
+const String messageNumber = "012344888588";
 
 // The port to listen for incoming TCP connections
 #define LISTEN_PORT           80
@@ -76,6 +76,7 @@ void setup() {
   // rest
   // Function to be exposed
  rest.function("sms",sendSMS);
+ rest.function("reset",resetWifi);
 
  // Give name & ID to the device (ID should be 6 characters long)
  rest.set_id("123456");
@@ -129,6 +130,14 @@ void loop() {
   sdelay(2000);
 }
 
+int resetWifi(String vommand){
+  WiFiManager wifiManager;
+  //reset saved settings
+  wifiManager.resetSettings();
+  return 0;
+}
+
+
 int sendSMS(String command){
   String number = messageNumber;
   String message = httpDecode(command);
@@ -157,7 +166,27 @@ void switchLed(){
 }
 
 void reconnectWifi() {
-  WiFi.begin(ssid, password);
+  //WiFiManager
+  //Local intialization. Once its business is done, there is no need to keep it around
+  WiFiManager wifiManager;
+  //reset saved settings
+  //wifiManager.resetSettings();
+
+  //set custom ip for portal
+  wifiManager.setAPStaticIPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
+
+  //fetches ssid and pass from eeprom and tries to connect
+  //if it does not connect it starts an access point with the specified name
+  //here  "AutoConnectAP"
+  //and goes into a blocking loop awaiting configuration
+  wifiManager.autoConnect("SMS-Gateway-Config-AP");
+  //or use this for auto generated name ESP + ChipID
+  //wifiManager.autoConnect();
+
+
+  //if you get here you have connected to the WiFi
+  Serial.println("connected...yeey :)");
+
 }
 void onDisconnected(const WiFiEventStationModeDisconnected& event)
 {
