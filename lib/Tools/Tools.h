@@ -2,14 +2,23 @@
 #define tools2_h
 #include <ESP8266WiFi.h>
 #include <Arduino.h>
+#include <DisplayTools.h>
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 
 inline void sdelay(unsigned long sdelay){
+  DisplayTools* displayTools = DisplayTools::getInstance();
   unsigned long counter=0;
+  displayTools->show();
   while (counter <= sdelay){
     ESP.wdtFeed();
     counter += 10;
+    if ( counter % 500  == 0 ){
+      if ( displayTools != 0 ){
+        displayTools->show();
+      }
+    }
+
     delay(10);
   }
 }
