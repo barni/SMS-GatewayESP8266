@@ -8,7 +8,8 @@ REST API for SMS, e.g. http://sms.local/sms?params=111111^Dies ist ein Test2
  http://192.168.1.63/sms?params=1111^Dies ist ein Test2
 */
 
-//#define DEBUG
+//#define DEBUG 1
+
 #include <Arduino.h>
 
 #include <ESP8266WiFi.h>
@@ -20,7 +21,7 @@ REST API for SMS, e.g. http://sms.local/sms?params=111111^Dies ist ein Test2
 #include <WiFiManager.h>
 
 // Default SMS number
-const String messageNumber = "01231234567";
+const String messageNumber = "012356789000";
 // The port to listen for incoming TCP connections
 #define LISTEN_PORT 80
 #define I2C_SSD_ADR 0x3C
@@ -33,7 +34,7 @@ A6libcust A6l(D6, D5); // tx GPIO12, GPIO14
 
 int unreadSMSLocs[30] = {0};
 int unreadSMSNum = 0;
-int disconnected = 0;
+int disconnected = 1;
 bool led=true;
 SMSmessage sms;
 
@@ -68,8 +69,8 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) {
     sdelay(500);
     Serial.print(".");
-    disconnected=0;
   }
+  disconnected=0;
   Serial.println("WiFi connected");
   displayTools->setLineOne("WiFi connected");
   displayTools->setLineTwo("Starting GSM");
@@ -111,11 +112,7 @@ void setup() {
 
 void loop() {
   DisplayTools* displayTools = DisplayTools::getInstance();
-  if (disconnected == 1 && WiFi.status() == WL_CONNECTED){
-     Serial.print(String("[WIFI] IP: "));
-     Serial.println(WiFi.localIP());
-     disconnected = 0;
-   }
+
    if ( disconnected == 0){
     // Handle REST calls
     WiFiClient client = server.available();
@@ -139,7 +136,7 @@ void loop() {
   }
   if (conn && (disconnected == 0)){
     switchLed();
-    displayTools->setLineOne("OK... IP: " + WiFi.localIP().toString());
+    displayTools->setLineOne("OK IP: " + WiFi.localIP().toString());
     displayTools->setLineTwo("SMS send: " + String(smsSend));
   }else{
     Serial.println("Error:");
@@ -222,6 +219,7 @@ void reconnectWifi() {
 
   //if you get here you have connected to the WiFi
   Serial.println("connected...yeey :)");
+  disconnected = 0;
 
 }
 void onDisconnected(const WiFiEventStationModeDisconnected& event)
